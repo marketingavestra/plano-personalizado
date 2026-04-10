@@ -1273,10 +1273,10 @@
         utm_data:   utms
       });
 
-      // ── Redireciona para /obrigado com UTMs ───────────────────
+      // ── Redireciona para /obrigado/{tier} com UTMs ───────────
       var qs = new URLSearchParams(utms);
       qs.set('nome', nameParts[0] || nome);
-      window.location.href = '/obrigado?' + qs.toString();
+      window.location.href = '/obrigado/' + tier + '?' + qs.toString();
     }
 
     // ─── Data Maps ───────────────────────────────────────────────
