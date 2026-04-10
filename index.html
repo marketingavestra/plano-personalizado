@@ -1273,8 +1273,11 @@
         utm_data:   utms
       });
 
-      // ── Redireciona para /obrigado/{tier} com UTMs ───────────
-      var qs = new URLSearchParams(utms);
+      // ── Redireciona para /obrigado/{tier} preservando UTMs ───
+      // Mescla: params atuais da URL (se houver) + _avestra_utms (sessionStorage)
+      // Garante que UTMs nunca se percam mesmo em navegações sem query string
+      var qs = new URLSearchParams(window.location.search);
+      Object.keys(utms).forEach(function (k) { if (!qs.get(k)) qs.set(k, utms[k]); });
       qs.set('nome', nameParts[0] || nome);
       window.location.href = '/obrigado/' + tier + '?' + qs.toString();
     }
