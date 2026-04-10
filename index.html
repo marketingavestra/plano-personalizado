@@ -16,28 +16,33 @@
     // dataLayer init — deve vir ANTES do snippet do GTM
     window.dataLayer = window.dataLayer || [];
 
-    // Captura UTMs da URL e persiste no dataLayer para o GTM ler
+    // Captura UTMs da URL, normaliza (minúsculo + hífens) e persiste
     (function () {
-      var params = new URLSearchParams(window.location.search);
+      var getParams = new URLSearchParams(window.location.search);
       var utmKeys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'];
-      var utmData = {};
-      var hasUtm = false;
-      utmKeys.forEach(function (k) {
-        if (params.get(k)) { utmData[k] = params.get(k); hasUtm = true; }
+      var utm_data = {};
+
+      utmKeys.forEach(function (key) {
+        var val = getParams.get(key);
+        if (val) {
+          // Regra de nomenclatura: minúsculo e hífens
+          val = val.toLowerCase().trim().replace(/\s+/g, '-');
+          utm_data[key] = val;
+        }
       });
-      if (hasUtm) {
-        // Persiste na sessionStorage para sobreviver a recarregamentos
-        try { sessionStorage.setItem('avestra_utms', JSON.stringify(utmData)); } catch (e) { }
-        window.dataLayer.push({ event: 'utm_captured', utm_data: utmData });
+
+      // Se houver novas UTMs na URL, salva/sobrescreve. Se não, recupera do cache.
+      if (Object.keys(utm_data).length > 0) {
+        try { sessionStorage.setItem('avestra_utms', JSON.stringify(utm_data)); } catch (e) { }
+        window.dataLayer.push({ event: 'utm_captured', utm_data: utm_data });
       } else {
-        // Tenta recuperar UTMs da sessionStorage se a página foi recarregada
         try {
-          var stored = sessionStorage.getItem('avestra_utms');
-          if (stored) utmData = JSON.parse(stored);
+          var saved = sessionStorage.getItem('avestra_utms');
+          if (saved) utm_data = JSON.parse(saved);
         } catch (e) { }
       }
-      // Expõe globalmente para uso no form submit
-      window._avestra_utms = utmData;
+
+      window._avestra_utms = utm_data;
     })();
   </script>
 
@@ -52,6 +57,9 @@
     })(window, document, 'script', 'dataLayer', 'GTM-W98WXF4D');</script>
   <!-- /GTM -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Supabase JS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
@@ -1070,33 +1078,31 @@
         </div>
       </div>
 
-      <!-- 01.5 — PRESENÇA DIGITAL -->
+      <!-- 02 — O QUE TRAVA SEU CRESCIMENTO -->
       <div class="pb-section reveal">
-        <span class="pb-label">Seção 02 — Presença Digital (Monitoramento)</span>
+        <span class="pb-label">Seção 02 — Gargalos Identificados</span>
         <div class="pb-card">
-          <p class="pb-card-title">Análise de Canal e Digital Fingerprint</p>
-          <div id="digital-presence-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- Mocked data will be injected here -->
-          </div>
+          <p class="pb-card-title">O que está travando o crescimento do seu escritório</p>
+          <div id="gargalos-grid" class="script-grid"></div>
         </div>
       </div>
 
-      <!-- 02 — FLUXO COMERCIAL -->
+      <!-- 03 — PROCESSO COMERCIAL -->
       <div class="pb-section reveal">
-        <span class="pb-label">Seção 02 — Processo Comercial</span>
+        <span class="pb-label">Seção 03 — Processo Comercial</span>
         <div class="pb-card">
-          <p class="pb-card-title">Seu Fluxo de Venda Ideal (5 Etapas)</p>
+          <p class="pb-card-title">Como estruturamos seu processo de captação (5 etapas)</p>
+          <p style="font-size:12px;color:var(--n4);margin-bottom:16px;">O fluxo que a Avestra monta e opera junto ao seu escritório — do primeiro contato ao contrato assinado</p>
           <div id="flow-steps"></div>
         </div>
       </div>
 
-      <!-- 03 — SCRIPT DA REUNIÃO -->
+      <!-- 04 — SCRIPT DA REUNIÃO -->
       <div class="pb-section reveal">
-        <span class="pb-label">Seção 03 — Script SPIN para Reuniões</span>
+        <span class="pb-label">Seção 04 — Roteiro de Reunião</span>
         <div class="pb-card">
-          <p class="pb-card-title">Roteiro de Apresentação Comercial</p>
-          <p style="font-size:12px;color:var(--n4);margin-bottom:16px;">Método SPIN adaptado para advogados — baseado no
-            seu nicho</p>
+          <p class="pb-card-title">Script de apresentação comercial para o seu nicho</p>
+          <p style="font-size:12px;color:var(--n4);margin-bottom:16px;">Método SPIN adaptado para o seu nicho — o roteiro que usamos nas reuniões do seu escritório</p>
           <div class="script-grid" id="script-grid"></div>
           <div id="script-tip"
             style="background:rgba(80,112,176,0.07);border:1px solid rgba(80,112,176,0.18);border-radius:10px;padding:14px;">
@@ -1104,21 +1110,21 @@
         </div>
       </div>
 
-      <!-- 04 — CRONOGRAMA -->
+      <!-- 05 — PLANO DE AÇÃO -->
       <div class="pb-section reveal">
-        <span class="pb-label">Seção 04 — Plano de Implementação</span>
-        <h3 class="font-manrope" style="font-size:19px;font-weight:700;color:var(--n2);margin-bottom:16px;">30 / 60 / 90
-          Dias</h3>
+        <span class="pb-label">Seção 05 — Plano de Ação Avestra</span>
+        <h3 class="font-manrope" style="font-size:19px;font-weight:700;color:var(--n2);margin-bottom:6px;">O que fazemos nos primeiros 30 / 60 / 90 dias</h3>
+        <p style="font-size:12px;color:var(--n4);margin-bottom:16px;">Cada fase tem entregas concretas — você acompanha tudo com métricas reais</p>
         <div class="phase-grid" id="phase-grid"></div>
       </div>
 
-      <!-- 05 — PROJEÇÕES -->
+      <!-- 06 — PROJEÇÕES -->
       <div class="pb-section reveal">
-        <span class="pb-label">Seção 05 — Metas e Projeções</span>
+        <span class="pb-label">Seção 06 — Projeção de Resultado</span>
         <div class="pb-card">
-          <p class="pb-card-title">O que esperar em 90 dias</p>
+          <p class="pb-card-title">Antes e depois da Avestra no seu escritório</p>
           <div class="compare-grid" id="compare-grid"></div>
-          <p id="disclaimer" style="font-size:11px;color:var(--n4);font-style:italic;"></p>
+          <p id="disclaimer" style="font-size:11px;color:var(--n4);font-style:italic;margin-top:12px;"></p>
         </div>
       </div>
 
@@ -1182,60 +1188,95 @@
       if (e.target === document.getElementById('modal-overlay')) closeModal();
     }
 
+    // ─── Supabase client ─────────────────────────────────────────
+    const _sb = supabase.createClient(
+      'https://wjfamwtqssabjfustzmq.supabase.co',
+      'sb_publishable_mO7HIOeGvV1an4VYTfl7Sg_wV8zGCRB'
+    );
+
+    // ─── Lead Scoring ─────────────────────────────────────────────
+    function calcPropostaScore(formData, utms) {
+      var score = 0;
+
+      // 1. Faturamento (0–4 pts)
+      var fatScores = { 'ate5k': 0, '5a15k': 1, '15a30k': 2, '30a60k': 3, 'acima60k': 4 };
+      score += fatScores[formData.fat] || 0;
+
+      // 2. Cargo (0–3 pts)
+      var roleScores = { 'dono-consolidado': 3, 'dono-novo': 2, 'colaborador': 1, 'estagiario': 0 };
+      score += roleScores[formData.role] || 0;
+
+      // 3. Modificador de campanha UTM
+      if (utms.utm_campaign && utms.utm_campaign.includes('lal-quente')) score += 0.5;
+      if (utms.utm_campaign && utms.utm_campaign.includes('rmk-frio'))   score -= 0.5;
+
+      // Classificação de tier
+      var tier = 'frio';
+      if (score >= 5.5)     tier = 'quente';
+      else if (score >= 2)  tier = 'morno';
+
+      return { score: score, tier: tier };
+    }
+
     // ─── Form submit ─────────────────────────────────────────────
-    function handleSubmit(e) {
+    async function handleSubmit(e) {
       e.preventDefault();
-      const nome = document.getElementById('f-nome').value.trim();
-      const role = document.getElementById('f-role').value;
-      const nicho = document.getElementById('f-nicho').value;
+      const nome    = document.getElementById('f-nome').value.trim();
+      const email   = document.getElementById('f-email').value.trim().toLowerCase();
+      const phone   = document.getElementById('f-phone').value.replace(/\D/g, '').replace(/^0/, '');
+      const role    = document.getElementById('f-role').value;
+      const nicho   = document.getElementById('f-nicho').value;
       const tamanho = document.getElementById('f-tamanho').value;
-      const fat = document.getElementById('f-fat').value;
+      const fat     = document.getElementById('f-fat').value;
 
       if (!nome || !role || !nicho || !tamanho || !fat) { alert('Por favor, preencha todos os campos.'); return; }
 
-      // Qualificação: apenas donos/sócios são leads qualificados
-      const isQualified = role === 'dono-consolidado' || role === 'dono-novo';
-
-      // ── dataLayer: generate_lead — só dispara para leads qualificados ───
-      var nameParts = nome.split(' ');
-      window.dataLayer = window.dataLayer || [];
-      if (isQualified) {
-        window.dataLayer.push({
-          event: 'generate_lead',
-          user_data: {
-            email: document.getElementById('f-email').value.trim().toLowerCase(),
-            phone_number: '+55' + document.getElementById('f-phone').value.replace(/\D/g, '').replace(/^0/, ''),
-            address: {
-              first_name: nameParts[0] || '',
-              last_name: nameParts.slice(1).join(' ') || ''
-            }
-          },
-          form_data: {
-            role: role,
-            nicho: document.getElementById('f-nicho').value,
-            tamanho: document.getElementById('f-tamanho').value,
-            fat: document.getElementById('f-fat').value
-          },
-          utm_data: window._avestra_utms || {}
-        });
-      }
+      const utms        = window._avestra_utms || {};
+      const { score, tier } = calcPropostaScore({ fat, role }, utms);
+      const isQualified = tier === 'quente' || tier === 'morno';
 
       const btn = document.getElementById('form-btn');
-      btn.textContent = 'GERANDO SUA PROPOSTA...';
+      btn.textContent = 'ENVIANDO...';
       btn.disabled = true;
 
-      // Simulate brief loading
-      setTimeout(() => {
-        closeModal();
-        buildPlaybook(nome, nicho, tamanho, fat, isQualified);
-        document.getElementById('landing-page').style.display = 'none';
-        const result = document.getElementById('playbook-result');
-        result.classList.add('show');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        setTimeout(initReveal, 200);
-        btn.textContent = 'RECEBER MINHA PROPOSTA AGORA';
-        btn.disabled = false;
-      }, 1400);
+      // ── Supabase INSERT ───────────────────────────────────────
+      await _sb.from('leads_propostas').insert({
+        nome, email,
+        telefone:     phone ? '+55' + phone : null,
+        role, nicho, tamanho, fat,
+        is_qualified: isQualified,
+        score,
+        tier,
+        utm_source:   utms.utm_source   || null,
+        utm_medium:   utms.utm_medium   || null,
+        utm_campaign: utms.utm_campaign || null,
+        utm_content:  utms.utm_content  || null,
+        utm_term:     utms.utm_term     || null,
+      });
+
+      // ── dataLayer: generate_lead ──────────────────────────────
+      var nameParts = nome.split(' ');
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({
+        event: 'generate_lead',
+        user_data: {
+          email,
+          phone_number: phone ? '+55' + phone : '',
+          address: {
+            first_name: nameParts[0] || '',
+            last_name:  nameParts.slice(1).join(' ') || ''
+          }
+        },
+        lead_score: score,
+        lead_type:  tier,
+        form_data:  { role, nicho, fat },
+        utm_data:   utms
+      });
+
+      // ── Redireciona para /obrigado com UTMs ───────────────────
+      var qs = new URLSearchParams(utms);
+      qs.set('nome', nameParts[0] || nome);
+      window.location.href = '/obrigado?' + qs.toString();
     }
 
     // ─── Data Maps ───────────────────────────────────────────────
@@ -1403,33 +1444,32 @@
       document.getElementById('diag-title').textContent = `Diagnóstico Comercial — Escritório de ${n.label}`;
       document.getElementById('diag-body').innerHTML = `
         <p style="margin-bottom:12px;">
-          <strong style="color:var(--n2);">${fn},</strong> com base nos dados que você informou, seu escritório está na fase de
-          <strong style="color:var(--b5);">${f.fase}</strong>.
+          <strong style="color:var(--n2);">${fn},</strong> analisamos o perfil do seu escritório e identificamos que você está na fase de
+          <strong style="color:var(--b5);">${f.fase}</strong> — com oportunidade real de escala nos próximos 90 dias.
         </p>
         <p style="margin-bottom:12px;">
-          Você atua em <strong style="color:var(--n2);">${n.label}</strong>, atendendo principalmente
-          <em>${n.cliente}</em>. A principal dor que esse cliente carrega antes de te contratar é:
-          <strong style="color:var(--n2);">"${n.dor}"</strong>.
+          Escritórios de <strong style="color:var(--n2);">${n.label}</strong> atendem principalmente <em>${n.cliente}</em>.
+          O cliente chega até você carregando: <strong style="color:var(--n2);">"${n.dor}"</strong> — e é exatamente essa dor que o processo comercial que montamos precisa explorar antes de qualquer apresentação de honorários.
         </p>
         <p style="margin-bottom:12px;">
-          Com um escritório de <strong style="color:var(--n2);">${t.label}</strong>,
-          ${t.estrutura}. O desafio central é: <em>${t.foco}</em>.
+          Com <strong style="color:var(--n2);">${t.label}</strong>, ${t.estrutura.toLowerCase()}.
+          O que identificamos como maior gargalo: <em>${t.foco}</em>.
         </p>
         <p>
-          Concorrência no seu nicho: <strong style="color:var(--n2);">${n.concorrencia}</strong>.
-          Seu principal diferencial precisa ser: <strong style="color:var(--b5);">${n.dif}</strong>.
+          A concorrência no seu nicho é <strong style="color:var(--n2);">${n.concorrencia}</strong>.
+          O diferencial que posicionamos para o seu escritório: <strong style="color:var(--b5);">${n.dif}</strong>.
           Escritórios sem processo comercial definido perdem até
-          <strong style="color:#ef4444;">40% das reuniões</strong> que deveriam fechar.
+          <strong style="color:#ef4444;">40% das reuniões</strong> que deveriam fechar — e a maioria não sabe disso.
         </p>
       `;
       document.getElementById('diag-metrics').innerHTML = `
         <div class="metric-item">
           <div class="metric-num">${t.conv}</div>
-          <div class="metric-label">Taxa de conversão alvo</div>
+          <div class="metric-label">Taxa de conversão alvo com nosso processo</div>
         </div>
         <div class="metric-item">
           <div class="metric-num">${f.novos}</div>
-          <div class="metric-label">Novos clientes/mês meta</div>
+          <div class="metric-label">Novos clientes/mês projetados</div>
         </div>
         <div class="metric-item">
           <div class="metric-num">${n.ticket.split('–')[0]}</div>
@@ -1437,51 +1477,42 @@
         </div>
         <div class="metric-item">
           <div class="metric-num">90</div>
-          <div class="metric-label">Dias para resultado</div>
+          <div class="metric-label">Dias para resultado mensurável</div>
         </div>
       `;
 
-      // 01.5 — Digital Presence (Mocked)
-      const hasAds = Math.random() > 0.4;
-      const igEng  = (Math.random() * (2.8 - 0.4) + 0.4).toFixed(1);
-      const gmbRating = (Math.random() * (4.9 - 3.1) + 3.1).toFixed(1);
-      const gmbPos = Math.floor(Math.random() * 15) + 3;
-      
-      const adsText = hasAds 
-        ? `<span class="text-green-400">Ativos</span>. Ponto de melhoria: Criativos de Prova Social e retargeting com depoimentos.` 
-        : `<span class="text-red-400">Inexistentes</span>. Você está perdendo demanda reprimida para concorrentes locais.`;
-
-      document.getElementById('digital-presence-grid').innerHTML = `
+      // 02 — Gargalos
+      document.getElementById('gargalos-grid').innerHTML = `
         <div class="script-item">
-          <p class="script-tag">📸 Instagram</p>
-          <p class="script-text">Engajamento de <strong class="text-white">${igEng}%</strong>. Perfil com autoridade média. Foco em Reels informativos para aumentar alcance orgânico.</p>
+          <p class="script-tag">🚫 Captação</p>
+          <p class="script-text">Dependência de indicações sem processo ativo. O escritório cresce quando alguém indica — e para quando para de indicar. Isso não é escala, é sorte.</p>
         </div>
         <div class="script-item">
-          <p class="script-tag">📺 Biblioteca de Anúncios</p>
-          <p class="script-text">Status: ${adsText}</p>
+          <p class="script-tag">🚫 Reunião</p>
+          <p class="script-text">Apresentações sem roteiro definido. Cada reunião começa do zero — sem perguntas certas, sem âncora de valor, sem caminho para o fechamento.</p>
         </div>
         <div class="script-item">
-          <p class="script-tag">📍 Google Meu Negócio</p>
-          <p class="script-text">Nota atual: <strong class="text-white">${gmbRating}★</strong>. Posicionamento médio: <strong class="text-white">${gmbPos}ª posição</strong>. Precisa de mais 15 avaliações para o Top 3.</p>
+          <p class="script-tag">🚫 Proposta</p>
+          <p class="script-text">Honorários apresentados cedo demais, sem o cliente ter sentido o peso do problema. O resultado: objeção de preço que na verdade é falta de percepção de valor.</p>
         </div>
         <div class="script-item">
-          <p class="script-tag">🤖 Visibilidade em IA (GEO - Gemini/ChatGPT)</p>
-          <p class="script-text">Status: <strong class="text-white">Recomendação Média</strong>. Seu escritório aparece em buscas por "Advogado ${n.label}" em 2 de cada 5 prompts realizados nessas IAs. Necessário reforçar <strong class="text-white">Citações e Atributos</strong> para garantir a 1ª posição nas sugestões destas ferramentas.</p>
+          <p class="script-tag">🚫 Follow-up</p>
+          <p class="script-text">Leads que saem da reunião sem um próximo passo claro somem. Sem follow-up estruturado, até ${tamanho === 'solo' ? '55%' : '45%'} dos fechamentos possíveis são perdidos nos dias seguintes.</p>
         </div>
       `;
 
-      // 03 — Fluxo
+      // 03 — Fluxo (Avestra como implementadora)
       document.getElementById('flow-steps').innerHTML = [
-        ['Qualificação prévia (WhatsApp)',
-          `Antes da reunião, envie 3 perguntas por WhatsApp: qual o problema específico, há quanto tempo existe, e já tentou resolver antes. Isso filtra ~35% dos leads não qualificados e chega à reunião com contexto.`],
-        ['Reunião de Diagnóstico (30–45 min)',
-          `Use o roteiro SPIN: <strong style="color:var(--n2);">Situação</strong> → <strong style="color:var(--n2);">Problema</strong> → <strong style="color:var(--n2);">Implicação</strong> → <strong style="color:var(--n2);">Necessidade</strong>. Nunca apresente soluções antes de aprofundar bem o problema.`],
-        ['Apresentação como Plano Estratégico',
-          `Apresente sua proposta como um plano personalizado — não uma lista de serviços. Mostre o caminho: onde o cliente está → onde vai chegar → como você vai conduzi-lo. Isso diferencia você de 90% dos advogados.`],
-        ['Fechamento com Ancoragem de Valor',
-          `Ofereça sempre 2 opções (ex: "essencial" e "completo"). O cliente decide entre as duas opções, não entre contratar ou não. Coloque sempre uma validade de 5–7 dias na proposta.`],
-        ['Follow-up estruturado (3 etapas)',
-          `D+1: envie resumo da reunião e dores identificadas. D+3: envie proposta formal. D+7: follow-up final com algum elemento de urgência real (jurisprudência, prazo, vaga). Esse processo aumenta a conversão em ~55%.`],
+        ['Qualificação antes da reunião',
+          `A Avestra estrutura um roteiro de qualificação via WhatsApp — 3 perguntas que filtram os leads certos antes da reunião acontecer. Isso elimina reuniões improdutivas e chega na conversa com contexto. Reduz em ~35% o tempo gasto com leads desqualificados.`],
+        ['Reunião de Diagnóstico com método SPIN',
+          `Montamos o roteiro de reunião personalizado para <strong style="color:var(--n2);">${n.label}</strong> usando o método SPIN: <strong style="color:var(--n2);">Situação → Problema → Implicação → Necessidade</strong>. O cliente sente o peso do problema antes de ouvir qualquer número de honorário.`],
+        ['Apresentação como proposta de valor — não lista de serviços',
+          `Treinamos e estruturamos a apresentação como um plano estratégico personalizado. O cliente vê o caminho: onde está hoje → onde vai chegar → como o escritório vai conduzi-lo. Isso diferencia o ${fn} de 90% dos advogados do mesmo nicho.`],
+        ['Fechamento com ancoragem e urgência real',
+          `Implementamos a técnica de duas opções — "essencial" e "completo" — para que o cliente decida entre qual contratar, não se vai contratar. Toda proposta sai com validade de 5–7 dias, criando urgência legítima.`],
+        ['Follow-up de 3 etapas (a Avestra opera junto)',
+          `D+1: resumo da reunião com as dores identificadas. D+3: proposta formal. D+7: follow-up final com elemento de urgência real (prazo, jurisprudência ou vaga). Esse processo aumenta a taxa de conversão em ~55%.`],
       ].map(([h, p], i) => `
         <div class="step-row">
           <div class="step-num">${i + 1}</div>
@@ -1489,90 +1520,92 @@
         </div>
       `).join('');
 
-      // 03 — Script SPIN
+      // 04 — Script SPIN
       document.getElementById('script-grid').innerHTML = `
         <div class="script-item">
-          <p class="script-tag">🔍 Situação (5 min)</p>
+          <p class="script-tag">🔍 Situação — primeiros 5 min</p>
           <p class="script-text">"${n.script_s}"</p>
         </div>
         <div class="script-item">
-          <p class="script-tag">⚡ Problema (10 min)</p>
+          <p class="script-tag">⚡ Problema — 10 min</p>
           <p class="script-text">"${n.script_p}"</p>
         </div>
         <div class="script-item">
-          <p class="script-tag">🎯 Implicação (10 min)</p>
+          <p class="script-tag">🎯 Implicação — 10 min</p>
           <p class="script-text">"${n.script_i}"</p>
         </div>
         <div class="script-item">
-          <p class="script-tag">💡 Necessidade (5 min)</p>
+          <p class="script-tag">💡 Necessidade — 5 min</p>
           <p class="script-text">"${n.script_n}"</p>
         </div>
       `;
       document.getElementById('script-tip').innerHTML =
-        `<p style="font-size:12px;color:var(--n3);">💡 <strong style="color:var(--n2);">Dica para ${n.label}:</strong> ${n.tip}</p>`;
+        `<p style="font-size:12px;color:var(--n3);">⚠️ <strong style="color:var(--n2);">Ponto crítico para ${n.label}:</strong> ${n.tip}</p>`;
 
-      // 04 — Fases
+      // 05 — Plano de Ação Avestra
       document.getElementById('phase-grid').innerHTML = `
         <div class="phase-card">
           <p class="phase-title">Primeiros 30 Dias</p>
-          <p class="phase-period">Construção do processo</p>
+          <p class="phase-period">Estruturação</p>
           <ul class="phase-list">
-            <li>Montar roteiro de qualificação (3 perguntas WhatsApp)</li>
-            <li>Criar script SPIN para ${n.label}</li>
-            <li>Definir 2 pacotes de honorários com ancoragem</li>
-            <li>Criar template de proposta personalizada</li>
-            <li>Mapear 10 leads potenciais por semana</li>
+            <li>Avestra monta o roteiro de qualificação do seu escritório</li>
+            <li>Criamos o script SPIN adaptado para ${n.label}</li>
+            <li>Definimos seus 2 pacotes de honorários com ancoragem de valor</li>
+            <li>Entregamos o template de proposta personalizada</li>
+            <li>Ativamos o primeiro canal de captação ativa</li>
           </ul>
         </div>
         <div class="phase-card">
           <p class="phase-title">Dias 31 a 60</p>
-          <p class="phase-period">Teste e calibração</p>
+          <p class="phase-period">Operação e Calibração</p>
           <ul class="phase-list">
-            <li>Rodar 15–20 reuniões com o novo roteiro</li>
-            <li>Registrar as 5 objeções mais comuns</li>
-            <li>Ajustar script com base nos feedbacks reais</li>
-            <li>Implementar follow-up de 3 etapas</li>
-            <li>Medir taxa de conversão e ticket médio</li>
+            <li>Acompanhamos 15–20 reuniões com o novo roteiro</li>
+            <li>Mapeamos as objeções reais do seu mercado</li>
+            <li>Ajustamos script e proposta com dados reais</li>
+            <li>Ativamos o follow-up de 3 etapas</li>
+            <li>Entregamos relatório de conversão e ticket médio</li>
           </ul>
         </div>
         <div class="phase-card">
           <p class="phase-title">Dias 61 a 90</p>
           <p class="phase-period">Escala</p>
           <ul class="phase-list">
-            <li>Otimizar o funil com base nos dados reais</li>
-            <li>${tamanho === 'solo' ? 'Criar materiais de apoio para reuniões' : 'Treinar equipe no processo padronizado'}</li>
-            <li>Atingir meta de ${f.novos} novos clientes/mês</li>
-            <li>Implementar sistema de indicação ativa</li>
-            <li>Revisar pricing com base no mercado e conversão</li>
+            <li>Otimizamos o funil com base nos dados coletados</li>
+            <li>${tamanho === 'solo' ? 'Criamos materiais de apoio para suas reuniões' : 'Treinamos sua equipe no processo padronizado'}</li>
+            <li>Chegamos à meta de ${f.novos} novos clientes/mês</li>
+            <li>Implementamos sistema de indicação ativa</li>
+            <li>Revisamos pricing com base em conversão real</li>
           </ul>
         </div>
       `;
 
-      // 05 — Projeções
+      // 06 — Projeções
       document.getElementById('compare-grid').innerHTML = `
         <div class="compare-hoje">
-          <p class="compare-tag-red">Hoje — Sem processo definido</p>
+          <p class="compare-tag-red">Hoje — Sem processo comercial</p>
           <ul class="compare-list">
             <li>Faturamento atual: <strong>${f.label}</strong></li>
             <li>Conversão em reuniões: menos de 20%</li>
             <li>Origem dos clientes: 100% indicação</li>
             <li>Previsibilidade de caixa: nenhuma</li>
             <li>Controle sobre o crescimento: zero</li>
+            <li>Tempo gasto em reuniões improdutivas: alto</li>
           </ul>
         </div>
         <div class="compare-meta">
-          <p class="compare-tag-green">Em 90 dias — Com o Playbook</p>
+          <p class="compare-tag-green">Em 90 dias — Com a Avestra</p>
           <ul class="compare-list">
             <li>Projeção de faturamento: <strong style="color:#22c55e;">${f.meta90}</strong></li>
             <li>Conversão em reuniões: <strong style="color:#22c55e;">${t.conv}</strong></li>
             <li>Novos clientes/mês: <strong style="color:#22c55e;">${f.novos}</strong></li>
-            <li>Processo: <strong style="color:#22c55e;">previsível e replicável</strong></li>
-            <li>Controle: <strong style="color:#22c55e;">pipeline com métricas reais</strong></li>
+            <li>Processo: <strong style="color:#22c55e;">previsível e documentado</strong></li>
+            <li>Pipeline: <strong style="color:#22c55e;">com métricas e acompanhamento</strong></li>
+            <li>Captação: <strong style="color:#22c55e;">ativa — não depende de indicação</strong></li>
           </ul>
         </div>
       `;
       document.getElementById('disclaimer').textContent =
-        `* Projeção conservadora baseada em escritórios similares de ${n.label} com ${t.label}. Resultados reais dependem da dedicação à implementação. Ticket médio do nicho: ${n.ticket}.`;
+        `* Projeção conservadora baseada em escritórios de ${n.label} com perfil similar (${t.label}) atendidos pela Avestra. Ticket médio do nicho: ${n.ticket}. Resultados dependem da consistência na implementação do processo.`;
     }
 
     // ─── Scroll Reveal ───────────────────────────────────────────
