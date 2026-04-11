@@ -1272,11 +1272,18 @@
       }
     }
 
-    // ─── Supabase client ─────────────────────────────────────────
-    const _sb = supabase.createClient(
-      'https://wjfamwtqssabjfustzmq.supabase.co',
-      'sb_publishable_mO7HIOeGvV1an4VYTfl7Sg_wV8zGCRB'
-    );
+    // ─── Supabase client (criado com segurança — SDK pode não ter carregado) ──
+    var _sb = null;
+    try {
+      if (typeof supabase !== 'undefined') {
+        _sb = supabase.createClient(
+          'https://wjfamwtqssabjfustzmq.supabase.co',
+          'sb_publishable_mO7HIOeGvV1an4VYTfl7Sg_wV8zGCRB'
+        );
+      }
+    } catch (e) {
+      console.warn('Supabase SDK nao carregou:', e);
+    }
 
     // ─── Lead Scoring ─────────────────────────────────────────────
     function calcPropostaScore(formData, utms) {
@@ -1332,6 +1339,7 @@
 
       // ── Supabase INSERT (falha silenciosa — redirect sempre ocorre) ──
       try {
+        if (!_sb) throw new Error('Supabase nao inicializado');
         await _sb.from('leads_propostas').insert({
           nome, email,
           telefone:     phone ? '+55' + phone : null,
