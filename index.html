@@ -27,7 +27,7 @@
           if (v) { d[k] = v.toLowerCase().trim().replace(/\s+/g,'-'); hasNew = true; }
         });
 
-        if (!hasNew && (!saved || Object.keys(d).length === 0)) {
+        if (!hasNew && !d.utm_source) {
           var ref = document.referrer.toLowerCase();
           var ua  = navigator.userAgent.toLowerCase();
           if      (ua.indexOf('instagram') > -1)                                                   { d = {utm_source:'instagram', utm_medium:'social-app',    utm_campaign:'acesso-bio'};       }
