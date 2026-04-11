@@ -12,18 +12,40 @@
        Dispara: PageView automático + eventos configurados no GTM
        (Meta Pixel, GA4 e CAPI passam por aqui via Stape server-side)
   ════════════════════════════════════════════════════════════ -->
-  <script>window.dataLayer=window.dataLayer||[];(function(){var p=new URLSearchParams(window.location.search),k=['utm_source','utm_medium','utm_campaign','utm_content','utm_term'],d={},h=false;k.forEach(function(x){var v=p.get(x);if(v){d[x]=v.toLowerCase().trim().replace(/\s+/g,'-');h=true;}});if(h){try{sessionStorage.setItem('avestra_utms',JSON.stringify(d));}catch(e){}}else{try{var sv=sessionStorage.getItem('avestra_utms');if(sv)d=JSON.parse(sv);}catch(e){}if(!Object.keys(d).length){var ua=(navigator.userAgent||'').toLowerCase(),rf=(document.referrer||'').toLowerCase(),m=false,um=[{q:['instagram'],s:'instagram',md:'social-dm',c:'app-instagram'},{q:['whatsapp'],s:'whatsapp',md:'messaging-dm',c:'app-whatsapp'},{q:['fban','fbav','fb_iab','[fb;'],s:'facebook',md:'social-dm',c:'app-facebook'},{q:['twitter for'],s:'twitter',md:'social-dm',c:'app-twitter'},{q:['linkedinapp'],s:'linkedin',md:'social-dm',c:'app-linkedin'}];for(var i=0;i<um.length&&!m;i++)for(var j=0;j<um[i].q.length&&!m;j++)if(ua.indexOf(um[i].q[j])!==-1){d={utm_source:um[i].s,utm_medium:um[i].md,utm_campaign:um[i].c,utm_content:'nenhum',utm_term:'nenhum'};m=true;}if(!m&&rf){var rm=[{q:['l.instagram.com','instagram.com'],s:'instagram',md:'social',c:'referrer-instagram'},{q:['web.whatsapp.com'],s:'whatsapp',md:'messaging',c:'referrer-whatsapp'},{q:['facebook.com','fb.com'],s:'facebook',md:'social',c:'referrer-facebook'},{q:['google.com'],s:'google',md:'organic',c:'referrer-google'},{q:['youtube.com','youtu.be'],s:'youtube',md:'social',c:'referrer-youtube'},{q:['linkedin.com'],s:'linkedin',md:'social',c:'referrer-linkedin'}];for(var a=0;a<rm.length&&!m;a++)for(var b=0;b<rm[a].q.length&&!m;b++)if(rf.indexOf(rm[a].q[b])!==-1){d={utm_source:rm[a].s,utm_medium:rm[a].md,utm_campaign:rm[a].c,utm_content:'nenhum',utm_term:'nenhum'};m=true;}}if(!m)d={utm_source:'direto',utm_medium:'none',utm_campaign:'acesso-direto',utm_content:'nenhum',utm_term:'nenhum'};try{sessionStorage.setItem('avestra_utms',JSON.stringify(d));}catch(e){}}}window._avestra_utms=d;window.dataLayer.push({event:'utm_captured',utm_data:d,traffic_type:h?'pago':'organico-direto'});})();</script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    (function() {
+      try {
+        var params = new URLSearchParams(window.location.search);
+        var saved  = sessionStorage.getItem('avestra_utms');
+        var d      = saved ? JSON.parse(saved) : {};
+        var keys   = ['utm_source','utm_medium','utm_campaign','utm_content','utm_term'];
+        var hasNew = false;
 
-  <!-- GTM snippet principal (Stape CDN) -->
-  <script>(function (w, d, s, l, i) {
-      w[l] = w[l] || []; w[l].push({
-        'gtm.start':
-          new Date().getTime(), event: 'gtm.js'
-      }); var f = d.getElementsByTagName(s)[0],
-        j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
-          'https://www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f);
-    })(window, document, 'script', 'dataLayer', 'GTM-W98WXF4D');</script>
-  <!-- /GTM -->
+        keys.forEach(function(k) {
+          var v = params.get(k);
+          if (v) { d[k] = v.toLowerCase().trim().replace(/\s+/g,'-'); hasNew = true; }
+        });
+
+        if (!hasNew && !saved) {
+          var ref = document.referrer.toLowerCase();
+          var ua  = navigator.userAgent.toLowerCase();
+          if      (ua.indexOf('instagram') > -1)                           { d = {utm_source:'instagram', utm_medium:'social-app',    utm_campaign:'bio-ig'};       }
+          else if (ua.indexOf('whatsapp')  > -1)                           { d = {utm_source:'whatsapp',  utm_medium:'messaging-app', utm_campaign:'direct-wa'};    }
+          else if (ref.indexOf('google.com') > -1)                         { d = {utm_source:'google',    utm_medium:'organic',       utm_campaign:'busca-direta'}; }
+          else if (ref.indexOf('instagram.com') > -1)                      { d = {utm_source:'instagram', utm_medium:'referral',      utm_campaign:'bio-ig'};       }
+          else if (ref.indexOf('facebook.com') > -1)                       { d = {utm_source:'facebook',  utm_medium:'referral',      utm_campaign:'fb-page'};      }
+          else                                                              { d = {utm_source:'direto',    utm_medium:'none',          utm_campaign:'acesso-direto'};}
+        }
+
+        sessionStorage.setItem('avestra_utms', JSON.stringify(d));
+        window._avestra_utms = d;
+        window.dataLayer.push({ event: 'utm_captured', utm_data: d });
+      } catch(e) {}
+    })();
+  </script>
+
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://stape.bonadio.site/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-W98WXF4D');</script>
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Supabase JS SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
