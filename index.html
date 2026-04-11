@@ -25,21 +25,65 @@
       utmKeys.forEach(function (key) {
         var val = getParams.get(key);
         if (val) {
-          // Regra de nomenclatura: minúsculo e hífens
           val = val.toLowerCase().trim().replace(/\s+/g, '-');
           utm_data[key] = val;
         }
       });
 
-      // Se houver novas UTMs na URL, salva/sobrescreve. Se não, recupera do cache.
+      // Se houver UTMs na URL → salva e usa
       if (Object.keys(utm_data).length > 0) {
         try { sessionStorage.setItem('avestra_utms', JSON.stringify(utm_data)); } catch (e) { }
         window.dataLayer.push({ event: 'utm_captured', utm_data: utm_data });
+
       } else {
+        // Tenta recuperar do cache (recarregamento ou navegação interna)
         try {
           var saved = sessionStorage.getItem('avestra_utms');
-          if (saved) utm_data = JSON.parse(saved);
+          if (saved) { utm_data = JSON.parse(saved); }
         } catch (e) { }
+
+        // Se ainda sem UTMs, infere a origem pelo referrer
+        if (Object.keys(utm_data).length === 0) {
+          var ref = document.referrer.toLowerCase();
+
+          // Mapa de domínios conhecidos → UTMs inferidas
+          var refMap = [
+            { match: ['l.instagram.com', 'instagram.com'],          source: 'instagram',  medium: 'social',         campaign: 'referrer-instagram' },
+            { match: ['web.whatsapp.com', 'api.whatsapp.com'],       source: 'whatsapp',   medium: 'messaging',      campaign: 'referrer-whatsapp' },
+            { match: ['facebook.com', 'fb.com', 'l.facebook.com'],   source: 'facebook',   medium: 'social',         campaign: 'referrer-facebook' },
+            { match: ['google.com', 'google.com.br'],                source: 'google',     medium: 'organic',        campaign: 'referrer-google' },
+            { match: ['bing.com'],                                    source: 'bing',       medium: 'organic',        campaign: 'referrer-bing' },
+            { match: ['t.co', 'twitter.com', 'x.com'],               source: 'twitter',    medium: 'social',         campaign: 'referrer-twitter' },
+            { match: ['youtube.com', 'youtu.be'],                    source: 'youtube',    medium: 'social',         campaign: 'referrer-youtube' },
+            { match: ['linkedin.com'],                               source: 'linkedin',   medium: 'social',         campaign: 'referrer-linkedin' },
+          ];
+
+          var matched = false;
+          for (var i = 0; i < refMap.length; i++) {
+            var entry = refMap[i];
+            for (var j = 0; j < entry.match.length; j++) {
+              if (ref.indexOf(entry.match[j]) !== -1) {
+                utm_data = { utm_source: entry.source, utm_medium: entry.medium, utm_campaign: entry.campaign };
+                matched = true;
+                break;
+              }
+            }
+            if (matched) break;
+          }
+
+          // Sem referrer e sem UTMs = tráfego direto real
+          if (!matched) {
+            utm_data = {
+              utm_source:   'direto',
+              utm_medium:   'none',
+              utm_campaign: 'acesso-direto'
+            };
+          }
+
+          // Salva para persistir nas próximas páginas da sessão
+          try { sessionStorage.setItem('avestra_utms', JSON.stringify(utm_data)); } catch (e) { }
+          window.dataLayer.push({ event: 'utm_captured', utm_data: utm_data });
+        }
       }
 
       window._avestra_utms = utm_data;
