@@ -27,21 +27,21 @@
           if (v) { d[k] = v.toLowerCase().trim().replace(/\s+/g,'-'); hasNew = true; }
         });
 
-        if (!hasNew && !saved) {
+        if (!hasNew && (!saved || Object.keys(d).length === 0)) {
           var ref = document.referrer.toLowerCase();
           var ua  = navigator.userAgent.toLowerCase();
-          if      (ua.indexOf('instagram') > -1)                           { d = {utm_source:'instagram', utm_medium:'social-app',    utm_campaign:'bio-ig'};       }
-          else if (ua.indexOf('whatsapp')  > -1)                           { d = {utm_source:'whatsapp',  utm_medium:'messaging-app', utm_campaign:'direct-wa'};    }
-          else if (ref.indexOf('google.com') > -1)                         { d = {utm_source:'google',    utm_medium:'organic',       utm_campaign:'busca-direta'}; }
-          else if (ref.indexOf('instagram.com') > -1)                      { d = {utm_source:'instagram', utm_medium:'referral',      utm_campaign:'bio-ig'};       }
-          else if (ref.indexOf('facebook.com') > -1)                       { d = {utm_source:'facebook',  utm_medium:'referral',      utm_campaign:'fb-page'};      }
-          else                                                              { d = {utm_source:'direto',    utm_medium:'none',          utm_campaign:'acesso-direto'};}
+          if      (ua.indexOf('instagram') > -1)                                                   { d = {utm_source:'instagram', utm_medium:'social-app',    utm_campaign:'acesso-bio'};       }
+          else if (ua.indexOf('whatsapp')  > -1)                                                   { d = {utm_source:'whatsapp',  utm_medium:'messaging-app', utm_campaign:'acesso-direto'};    }
+          else if (ref.indexOf('google.com') > -1)                                                 { d = {utm_source:'google',    utm_medium:'organic',       utm_campaign:'busca-organica'};   }
+          else if (ref.indexOf('l.instagram.com') > -1 || ref.indexOf('instagram.com') > -1)      { d = {utm_source:'instagram', utm_medium:'referral',      utm_campaign:'bio-ig'};           }
+          else if (ref.indexOf('facebook.com') > -1 || ref.indexOf('fb.com') > -1)                { d = {utm_source:'facebook',  utm_medium:'social',        utm_campaign:'acesso-perfil'};    }
+          else                                                                                     { d = {utm_source:'direto',    utm_medium:'none',          utm_campaign:'digitado-no-browser'};}
         }
 
         sessionStorage.setItem('avestra_utms', JSON.stringify(d));
         window._avestra_utms = d;
-        window.dataLayer.push({ event: 'utm_captured', utm_data: d });
-      } catch(e) {}
+        window.dataLayer.push({ event: 'utm_captured', utm_data: d, traffic_type: hasNew ? 'pago/marcado' : 'organico/direto' });
+      } catch(e) { console.error('Erro Tracking:', e); }
     })();
   </script>
 
