@@ -16,77 +16,100 @@
     // dataLayer init — deve vir ANTES do snippet do GTM
     window.dataLayer = window.dataLayer || [];
 
-    // Captura UTMs da URL, normaliza (minúsculo + hífens) e persiste
+    // Captura UTMs — 4 camadas: URL → sessionStorage → User Agent → referrer → direto
     (function () {
       var getParams = new URLSearchParams(window.location.search);
-      var utmKeys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'];
-      var utm_data = {};
+      var utmKeys   = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'];
+      var utm_data  = {};
+      var hasNewUtm = false;
 
+      // ── Camada 1: UTMs na URL (tráfego pago / links rastreados) ──
       utmKeys.forEach(function (key) {
         var val = getParams.get(key);
         if (val) {
-          val = val.toLowerCase().trim().replace(/\s+/g, '-');
-          utm_data[key] = val;
+          utm_data[key] = val.toLowerCase().trim().replace(/\s+/g, '-');
+          hasNewUtm = true;
         }
       });
 
-      // Se houver UTMs na URL → salva e usa
-      if (Object.keys(utm_data).length > 0) {
-        try { sessionStorage.setItem('avestra_utms', JSON.stringify(utm_data)); } catch (e) { }
-        window.dataLayer.push({ event: 'utm_captured', utm_data: utm_data });
+      if (hasNewUtm) {
+        // UTM explícita na URL — maior confiança, salva e usa
+        try { sessionStorage.setItem('avestra_utms', JSON.stringify(utm_data)); } catch (e) {}
 
       } else {
-        // Tenta recuperar do cache (recarregamento ou navegação interna)
+        // ── Camada 2: sessionStorage (recarregamento / navegação interna) ──
         try {
           var saved = sessionStorage.getItem('avestra_utms');
           if (saved) { utm_data = JSON.parse(saved); }
-        } catch (e) { }
+        } catch (e) {}
 
-        // Se ainda sem UTMs, infere a origem pelo referrer
+        // ── Camada 3 + 4: infere origem (só se sessão também vazia) ──
         if (Object.keys(utm_data).length === 0) {
-          var ref = document.referrer.toLowerCase();
+          var ua  = (navigator.userAgent || '').toLowerCase();
+          var ref = (document.referrer  || '').toLowerCase();
 
-          // Mapa de domínios conhecidos → UTMs inferidas
-          var refMap = [
-            { match: ['l.instagram.com', 'instagram.com'],          source: 'instagram',  medium: 'social',         campaign: 'referrer-instagram' },
-            { match: ['web.whatsapp.com', 'api.whatsapp.com'],       source: 'whatsapp',   medium: 'messaging',      campaign: 'referrer-whatsapp' },
-            { match: ['facebook.com', 'fb.com', 'l.facebook.com'],   source: 'facebook',   medium: 'social',         campaign: 'referrer-facebook' },
-            { match: ['google.com', 'google.com.br'],                source: 'google',     medium: 'organic',        campaign: 'referrer-google' },
-            { match: ['bing.com'],                                    source: 'bing',       medium: 'organic',        campaign: 'referrer-bing' },
-            { match: ['t.co', 'twitter.com', 'x.com'],               source: 'twitter',    medium: 'social',         campaign: 'referrer-twitter' },
-            { match: ['youtube.com', 'youtu.be'],                    source: 'youtube',    medium: 'social',         campaign: 'referrer-youtube' },
-            { match: ['linkedin.com'],                               source: 'linkedin',   medium: 'social',         campaign: 'referrer-linkedin' },
+          // ── Camada 3: User Agent — detecta app nativo (Instagram DM, WhatsApp, etc.) ──
+          // Apps móveis abrem links no navegador embutido que deixa rastro no UA
+          var uaMap = [
+            { match: ['instagram'],                        source: 'instagram', medium: 'social-dm',    campaign: 'app-instagram' },
+            { match: ['whatsapp'],                         source: 'whatsapp',  medium: 'messaging-dm', campaign: 'app-whatsapp'  },
+            { match: ['fban', 'fbav', 'fb_iab', '[fb;'],  source: 'facebook',  medium: 'social-dm',    campaign: 'app-facebook'  },
+            { match: ['twitter for'],                      source: 'twitter',   medium: 'social-dm',    campaign: 'app-twitter'   },
+            { match: ['linkedinapp'],                      source: 'linkedin',  medium: 'social-dm',    campaign: 'app-linkedin'  },
           ];
 
           var matched = false;
-          for (var i = 0; i < refMap.length; i++) {
-            var entry = refMap[i];
+          for (var i = 0; i < uaMap.length; i++) {
+            var entry = uaMap[i];
             for (var j = 0; j < entry.match.length; j++) {
-              if (ref.indexOf(entry.match[j]) !== -1) {
-                utm_data = { utm_source: entry.source, utm_medium: entry.medium, utm_campaign: entry.campaign };
-                matched = true;
-                break;
+              if (ua.indexOf(entry.match[j]) !== -1) {
+                utm_data = { utm_source: entry.source, utm_medium: entry.medium, utm_campaign: entry.campaign, utm_content: 'nenhum', utm_term: 'nenhum' };
+                matched = true; break;
               }
             }
             if (matched) break;
           }
 
-          // Sem referrer e sem UTMs = tráfego direto real
-          if (!matched) {
-            utm_data = {
-              utm_source:   'direto',
-              utm_medium:   'none',
-              utm_campaign: 'acesso-direto'
-            };
+          // ── Camada 4: document.referrer — acesso pelo navegador com referrer ──
+          if (!matched && ref) {
+            var refMap = [
+              { match: ['l.instagram.com', 'instagram.com'],         source: 'instagram', medium: 'social',     campaign: 'referrer-instagram' },
+              { match: ['web.whatsapp.com', 'api.whatsapp.com'],      source: 'whatsapp',  medium: 'messaging',  campaign: 'referrer-whatsapp'  },
+              { match: ['facebook.com', 'fb.com', 'l.facebook.com'],  source: 'facebook',  medium: 'social',     campaign: 'referrer-facebook'  },
+              { match: ['google.com', 'google.com.br'],               source: 'google',    medium: 'organic',    campaign: 'referrer-google'    },
+              { match: ['bing.com'],                                   source: 'bing',      medium: 'organic',    campaign: 'referrer-bing'      },
+              { match: ['t.co', 'twitter.com', 'x.com'],              source: 'twitter',   medium: 'social',     campaign: 'referrer-twitter'   },
+              { match: ['youtube.com', 'youtu.be'],                   source: 'youtube',   medium: 'social',     campaign: 'referrer-youtube'   },
+              { match: ['linkedin.com'],                              source: 'linkedin',  medium: 'social',     campaign: 'referrer-linkedin'  },
+            ];
+            for (var k = 0; k < refMap.length; k++) {
+              var re = refMap[k];
+              for (var l = 0; l < re.match.length; l++) {
+                if (ref.indexOf(re.match[l]) !== -1) {
+                  utm_data = { utm_source: re.source, utm_medium: re.medium, utm_campaign: re.campaign, utm_content: 'nenhum', utm_term: 'nenhum' };
+                  matched = true; break;
+                }
+              }
+              if (matched) break;
+            }
           }
 
-          // Salva para persistir nas próximas páginas da sessão
-          try { sessionStorage.setItem('avestra_utms', JSON.stringify(utm_data)); } catch (e) { }
-          window.dataLayer.push({ event: 'utm_captured', utm_data: utm_data });
+          // ── Sem sinal nenhum = tráfego direto real ──
+          if (!matched) {
+            utm_data = { utm_source: 'direto', utm_medium: 'none', utm_campaign: 'acesso-direto', utm_content: 'nenhum', utm_term: 'nenhum' };
+          }
+
+          try { sessionStorage.setItem('avestra_utms', JSON.stringify(utm_data)); } catch (e) {}
         }
       }
 
       window._avestra_utms = utm_data;
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({
+        event:        'utm_captured',
+        utm_data:     utm_data,
+        traffic_type: hasNewUtm ? 'pago-trackeado' : 'organico-direto'
+      });
     })();
   </script>
 
