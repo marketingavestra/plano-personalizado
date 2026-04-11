@@ -1,6 +1,14 @@
 {
   "cleanUrls": true,
   "trailingSlash": false,
+  "redirects": [
+    {
+      "source": "/",
+      "missing": [{ "type": "query", "key": "utm_source" }],
+      "destination": "/plano",
+      "permanent": false
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",
