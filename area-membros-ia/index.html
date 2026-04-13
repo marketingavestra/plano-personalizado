@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Área de Membros — Agentes de IA | Bonadio</title>
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-W98WXF4D');</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Manrope:wght@200;400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root{--b1:#204080;--b2:#306090;--b3:#5070B0;--b4:#6090C0;--b5:#90C0E0;--n1:#E0E0D0;--n2:#F0F0F0;--n3:#B0C0D0;--n4:#7090C0;--bg:#04080F;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg);color:var(--n1);font-family:'Inter',sans-serif;min-height:100vh;}
+    .stars-layer{position:fixed;inset:0;pointer-events:none;z-index:0;}
+    .s1{width:1px;height:1px;border-radius:50%;background:transparent;animation:animStar 60s linear infinite;box-shadow:120px 340px #fff,560px 80px #fff,900px 200px #fff,240px 620px #fff,780px 450px #fff,1100px 130px #fff,400px 750px #fff,1300px 380px #fff;}
+    @keyframes animStar{from{transform:translateY(0)}to{transform:translateY(-100vh)}}
+
+    nav{position:relative;z-index:20;max-width:1100px;margin:0 auto;padding:16px 28px;display:flex;align-items:center;justify-content:space-between;}
+    .logo{font-family:'Manrope',sans-serif;font-size:20px;font-weight:800;color:#fff;}
+    .logo span{color:var(--b5);}
+    .nav-badge{background:rgba(32,64,128,.3);border:1px solid rgba(80,112,176,.35);color:var(--b5);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:5px 14px;border-radius:50px;}
+
+    main{position:relative;z-index:10;max-width:960px;margin:0 auto;padding:40px 24px 100px;}
+
+    .page-header{text-align:center;margin-bottom:60px;}
+    .page-header h1{font-family:'Manrope',sans-serif;font-size:clamp(1.6rem,4vw,2.6rem);font-weight:800;color:#fff;margin-bottom:12px;}
+    .page-header p{font-size:14px;color:var(--n3);line-height:1.7;max-width:560px;margin:0 auto;}
+
+    .agents-list{display:flex;flex-direction:column;gap:24px;}
+    .agent-block{background:rgba(255,255,255,.03);border:1px solid rgba(80,112,176,.2);border-radius:16px;overflow:hidden;}
+    .agent-header{padding:24px 28px 20px;display:flex;align-items:flex-start;gap:16px;border-bottom:1px solid rgba(80,112,176,.15);}
+    .agent-icon{width:48px;height:48px;background:rgba(32,64,128,.4);border:1px solid rgba(80,112,176,.35);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+    .agent-info{flex:1;}
+    .agent-tag{display:inline-block;background:rgba(32,64,128,.25);border:1px solid rgba(80,112,176,.3);color:var(--b5);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;border-radius:50px;margin-bottom:8px;}
+    .agent-name{font-family:'Manrope',sans-serif;font-size:18px;font-weight:700;color:#fff;margin-bottom:6px;}
+    .agent-desc{font-size:13px;color:var(--n3);line-height:1.6;}
+
+    .agent-body{padding:24px 28px;}
+    .prompt-label{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--n4);margin-bottom:10px;}
+    .prompt-box{background:rgba(4,8,15,.6);border:1px solid rgba(80,112,176,.2);border-radius:10px;padding:18px 20px;font-family:'Courier New',monospace;font-size:12px;color:var(--n3);line-height:1.7;white-space:pre-wrap;word-break:break-word;max-height:260px;overflow-y:auto;margin-bottom:14px;}
+    .copy-btn{display:inline-flex;align-items:center;gap:7px;background:rgba(32,64,128,.3);border:1px solid rgba(80,112,176,.35);color:var(--b5);font-family:'Manrope',sans-serif;font-size:13px;font-weight:700;padding:9px 20px;border-radius:8px;cursor:pointer;transition:background .2s;}
+    .copy-btn:hover{background:rgba(32,64,128,.55);}
+    .copy-btn.copied{color:#22c55e;border-color:#22c55e;}
+
+    .upsell-box{margin-top:60px;background:rgba(32,64,128,.12);border:1px solid rgba(80,112,176,.3);border-radius:16px;padding:36px 32px;text-align:center;}
+    .upsell-box h3{font-family:'Manrope',sans-serif;font-size:1.5rem;font-weight:800;color:#fff;margin-bottom:10px;}
+    .upsell-box p{font-size:14px;color:var(--n3);line-height:1.75;margin-bottom:24px;max-width:480px;margin-left:auto;margin-right:auto;}
+    .upsell-btn{display:inline-flex;align-items:center;gap:8px;background:#25D366;color:#fff;font-family:'Manrope',sans-serif;font-weight:700;font-size:.95rem;padding:14px 28px;border-radius:50px;text-decoration:none;transition:background .2s;}
+    .upsell-btn:hover{background:#1ebe59;}
+
+    footer{text-align:center;padding:40px 24px;font-size:12px;color:var(--n4);position:relative;z-index:10;}
+    @media(max-width:600px){main{padding:24px 16px 80px;}.agent-header{flex-direction:column;gap:12px;}.agent-body{padding:20px 18px;}}
+  </style>
+</head>
+<body>
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-W98WXF4D" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <div class="stars-layer"><div class="s1"></div></div>
+
+  <nav>
+    <div class="logo"><span>Bonadio</span> · IA</div>
+    <div class="nav-badge">Área de Membros</div>
+  </nav>
+
+  <main>
+    <div class="page-header">
+      <h1>Seus agentes estão prontos</h1>
+      <p>Copie o prompt do agente, cole no Claude e descreva o seu caso. O agente executa o trabalho.</p>
+    </div>
+
+    <div class="agents-list">
+
+      <!-- AGENTE 1 -->
+      <div class="agent-block">
+        <div class="agent-header">
+          <div class="agent-icon">📄</div>
+          <div class="agent-info">
+            <div class="agent-tag">Petição Inicial</div>
+            <div class="agent-name">Agente de Petição Inicial (Deep Research)</div>
+            <div class="agent-desc">Cruza jurisprudência atualizada com os fatos do caso e estrutura a petição inicial completa com fundamentos, argumentação e pedidos.</div>
+          </div>
+        </div>
+        <div class="agent-body">
+          <div class="prompt-label">Prompt do Agente</div>
+          <div class="prompt-box" id="prompt-1">Você é um advogado especialista em [NICHO DO DIREITO] com 20 anos de experiência na elaboração de petições iniciais.
+
+Sua tarefa é redigir uma petição inicial completa e fundamentada com base nas informações do caso que vou fornecer.
+
+INSTRUÇÕES:
+1. Analise os fatos narrados e identifique os fundamentos jurídicos aplicáveis
+2. Pesquise e cite jurisprudência relevante dos tribunais superiores (STJ, STF, TRTs, TJs) dos últimos 3 anos
+3. Estruture a petição com: qualificação das partes, dos fatos, do direito, dos pedidos e do valor da causa
+4. Use linguagem técnica e precisa, adequada ao juízo competente
+5. Inclua pedido de tutela de urgência se os fatos indicarem necessidade
+
+INFORMAÇÕES DO CASO:
+- Nicho: [ex: Trabalhista / Previdenciário / Família]
+- Partes: [Autor: | Réu:]
+- Fatos: [Descreva os fatos em ordem cronológica]
+- Pedidos desejados: [Liste o que o cliente quer]
+- Documentos disponíveis: [Liste as provas]
+- Comarca/Juízo: [Local e tipo de juízo]
+
+Gere a petição inicial completa pronta para protocolo.</div>
+          <button class="copy-btn" onclick="copyPrompt('prompt-1', this)">📋 Copiar prompt</button>
+        </div>
+      </div>
+
+      <!-- AGENTE 2 -->
+      <div class="agent-block">
+        <div class="agent-header">
+          <div class="agent-icon">⚖️</div>
+          <div class="agent-info">
+            <div class="agent-tag">Contestação</div>
+            <div class="agent-name">Agente de Impugnação de Contestação</div>
+            <div class="agent-desc">Identifica falhas processuais, contradições e pontos vulneráveis na contestação da parte contrária. Gera impugnação fundamentada ponto a ponto.</div>
+          </div>
+        </div>
+        <div class="agent-body">
+          <div class="prompt-label">Prompt do Agente</div>
+          <div class="prompt-box" id="prompt-2">Você é um advogado especialista em técnica processual com foco em identificar vulnerabilidades em peças da parte contrária.
+
+Sua tarefa é analisar a contestação que vou colar abaixo e produzir uma Impugnação à Contestação fundamentada e cirúrgica.
+
+INSTRUÇÕES:
+1. Leia integralmente a contestação
+2. Identifique: (a) preliminares processuais frágeis ou improcedentes, (b) negativas genéricas de fatos incontroversos, (c) teses jurídicas desatualizadas ou contrárias à jurisprudência dominante, (d) contradições internas no texto
+3. Para cada ponto vulnerável, redija a impugnação correspondente com fundamentação legal e jurisprudencial
+4. Aponte quais documentos e provas já nos autos contradizem as alegações do réu
+5. Finalize com requerimento de rejeição de todas as preliminares e confirmação dos pedidos iniciais
+
+CONTESTAÇÃO DA PARTE CONTRÁRIA:
+[Cole aqui o texto integral da contestação]
+
+INFORMAÇÕES ADICIONAIS:
+- Nicho: [ex: Trabalhista]
+- Documentos nos autos que favorecem o autor: [Liste]
+- Pedidos originais da petição inicial: [Resuma]
+
+Gere a Impugnação à Contestação completa e pronta para protocolo.</div>
+          <button class="copy-btn" onclick="copyPrompt('prompt-2', this)">📋 Copiar prompt</button>
+        </div>
+      </div>
+
+      <!-- AGENTE 3 -->
+      <div class="agent-block">
+        <div class="agent-header">
+          <div class="agent-icon">📋</div>
+          <div class="agent-info">
+            <div class="agent-tag">Visual Law</div>
+            <div class="agent-name">Resumo Executivo para Juiz</div>
+            <div class="agent-desc">Condensa o processo em uma "petição de 1 página" no formato Visual Law textual para acelerar o despacho e facilitar a compreensão do magistrado.</div>
+          </div>
+        </div>
+        <div class="agent-body">
+          <div class="prompt-label">Prompt do Agente</div>
+          <div class="prompt-box" id="prompt-3">Você é especialista em Visual Law e comunicação jurídica clara aplicada ao processo judicial.
+
+Sua tarefa é criar um Resumo Executivo do processo para facilitar a leitura do magistrado e acelerar o despacho.
+
+O resumo deve ter no máximo 1 página (600 palavras) e seguir este formato visual:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📌 PROCESSO Nº [número] — [VARA/JUÍZO]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+👤 PARTES
+• Autor: [nome] — [qualificação resumida]
+• Réu: [nome] — [qualificação resumida]
+
+📖 FATO EM 3 LINHAS
+[Descrição objetiva do conflito em no máximo 3 linhas]
+
+⚖️ PEDIDO PRINCIPAL
+[1 linha clara com o que se pede]
+
+📎 PROVAS DISPONÍVEIS
+• [Prova 1]
+• [Prova 2]
+• [Prova 3]
+
+🏛️ FUNDAMENTO JURÍDICO (principal)
+[Lei ou artigo principal + 1 julgado do STJ/STF]
+
+⏱️ URGÊNCIA
+[SIM/NÃO — se sim, motivo em 1 linha]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+INFORMAÇÕES DO PROCESSO:
+- Número: [número]
+- Vara: [vara e comarca]
+- Fase atual: [ex: aguardando despacho inicial / após contestação]
+- Fatos: [cole aqui o resumo ou petição inicial]
+- Pedidos: [liste]
+- Provas: [liste documentos nos autos]
+
+Gere o resumo executivo completo no formato acima.</div>
+          <button class="copy-btn" onclick="copyPrompt('prompt-3', this)">📋 Copiar prompt</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- UPSELL -->
+    <div class="upsell-box">
+      <h3>Quer implementar isso no seu escritório com suporte direto?</h3>
+      <p>O Dr. Wladmir oferece implementação guiada — configura os agentes, treina sua equipe e adapta os prompts para o seu nicho e fluxo de trabalho.</p>
+      <a href="/mentoria-convite" class="upsell-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        Quero a Implementação Guiada
+      </a>
+    </div>
+  </main>
+
+  <footer>© 2025 Wladmir Bonadio Advocacia · <a href="https://avestra.com.br" style="color:var(--b5);text-decoration:none;">Avestra</a></footer>
+
+  <script>
+    function copyPrompt(id, btn) {
+      var text = document.getElementById(id).textContent;
+      navigator.clipboard.writeText(text).then(function() {
+        btn.textContent = '✓ Copiado!';
+        btn.classList.add('copied');
+        setTimeout(function() {
+          btn.textContent = '📋 Copiar prompt';
+          btn.classList.remove('copied');
+        }, 2000);
+      });
+    }
+  </script>
+</body>
+</html>
