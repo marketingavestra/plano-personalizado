@@ -1,0 +1,39 @@
+User-agent: *
+Allow: /
+Allow: /blog
+Allow: /blog/
+
+# Crawlers de IA generativa (GEO) — liberados para indexar o blog jurídico
+User-agent: GPTBot
+Allow: /blog
+Allow: /blog/
+
+User-agent: OAI-SearchBot
+Allow: /blog
+Allow: /blog/
+
+User-agent: ChatGPT-User
+Allow: /blog
+Allow: /blog/
+
+User-agent: ClaudeBot
+Allow: /blog
+Allow: /blog/
+
+User-agent: anthropic-ai
+Allow: /blog
+Allow: /blog/
+
+User-agent: PerplexityBot
+Allow: /blog
+Allow: /blog/
+
+User-agent: Google-Extended
+Allow: /blog
+Allow: /blog/
+
+User-agent: Bingbot
+Allow: /blog
+Allow: /blog/
+
+Sitemap: https://bonadio.site/sitemap.xml
